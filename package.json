@@ -1,0 +1,29 @@
+{
+  "name": "world-creator-mcp",
+  "version": "0.6.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "build:adapter": "node scripts/build-adapter.mjs",
+    "test": "node --test test/*.test.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "smoke:live": "node scripts/live-smoke.mjs",
+    "catalog": "node scripts/catalog.mjs",
+    "package": "node scripts/package.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "esbuild": "0.25.12",
+    "zod": "^4.0.0"
+  },
+  "description": "Unofficial local MCP adapter for the World Creator editor",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WilderNoTrack/world-creator-mcp.git"
+  }
+}

@@ -1,0 +1,12 @@
+node_modules/
+.local/
+.env
+.env.*
+!.env.example
+dist/
+*.tgz
+*.zip
+*.log
+# Historical local planning notes are not part of the public distribution.
+docs/superpowers/
+docs/design.md

@@ -1,0 +1,1977 @@
+[
+  {
+    "name": "worldcreator_archive_module",
+    "description": "Validate and archive an existing Module with the editor native implementation. Backs up the Module and top-level package first. Writes package GLB/meta and may normalize author meta. A completed archive does not confirm editor UI refresh.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "resourceId": {
+          "type": "string",
+          "pattern": "^module-[a-z0-9][a-z0-9-]*$"
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId",
+        "resourceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_asset_search",
+    "description": "Search the signed-in native model library (public/personal/favorite), hydrating results for canvas_add_asset or pcg_select. Returns IDs and pagination, without signed URLs. staticOnly restricts to static models suitable for sprinkle.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "scope": {
+          "default": "public",
+          "type": "string",
+          "enum": [
+            "public",
+            "personal",
+            "favorite"
+          ]
+        },
+        "staticOnly": {
+          "default": false,
+          "type": "boolean"
+        },
+        "page": {
+          "default": 0,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "cursor": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "limit": {
+          "default": 20,
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "projectId",
+        "query"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_add_asset",
+    "description": "Place an already-loaded asset into the current scene root using the native editor pipeline. Returns new object IDs; use canvas_update to position and canvas_save to persist.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "assetId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "assetId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_assets",
+    "description": "List currently loaded editor asset library entries; use returned assetId for placement. Does not expose signed resource URLs.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "search": {
+          "type": "string",
+          "maxLength": 100
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_capture",
+    "description": "Capture the current editor viewport via its native renderer connection into a local PNG. Returns local filePath; does not publish or upload.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_component_schema",
+    "description": "Read component properties and native editable field schemas. Asset identity is read-only; unsupported field types are explicitly marked.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_component_update",
+    "description": "Patch an existing native component using its schema: appearance/material, physics, light, Text3DUI and other supported schema types. Read canvas_component_schema first; unknown fields/types are rejected. No arbitrary Unity AddComponent.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "component": {
+          "type": "string",
+          "minLength": 1
+        },
+        "properties": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/__schema0"
+          }
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId",
+        "component",
+        "properties"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "__schema0": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema0"
+              }
+            },
+            {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "$ref": "#/definitions/__schema0"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "worldcreator_canvas_create_primitive",
+    "description": "Create one native basic shape at scene root. Returns its ID; use canvas_update to place it and canvas_save to persist.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "shape": {
+          "type": "string",
+          "enum": [
+            "cube",
+            "sphere",
+            "capsule",
+            "cylinder",
+            "plane"
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "shape"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_create_special",
+    "description": "Create a native point light, spot light, 3D text or water object. Read returned object components, then edit via canvas_component_update.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "point_light",
+            "spot_light",
+            "text3d",
+            "water"
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "kind"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_debug",
+    "description": "Read runtime object presence, world position, component types and script count, including during preview. Does not inspect Lua local variables or console logs.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_delete",
+    "description": "Delete scene objects and all descendants through native undoable actions. Does not delete library assets. Inspect IDs first and save separately.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceIds": {
+          "minItems": 1,
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceIds"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_focus",
+    "description": "Select and focus a scene object in the actual editor viewport.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_group",
+    "description": "Combine two or more sibling objects into a native group. Returns the new group ID; save separately.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceIds": {
+          "minItems": 2,
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceIds"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_history",
+    "description": "Undo or redo the latest native editor operation, including manual user edits. Read scene afterward. Never retry blindly.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "undo",
+            "redo"
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "action"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_import_glb",
+    "description": "Import the specified local GLB (20 MiB maximum) through the signed-in editor normal upload pipeline into its asset library. This uploads the file to the editor service. Returns assetId; then call canvas_add_asset.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "filePath": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 15
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 150
+        }
+      },
+      "required": [
+        "projectId",
+        "filePath",
+        "name",
+        "description"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_node",
+    "description": "Read one object, editable components and bound scripts. Asset resource URLs are omitted.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_pcg_status",
+    "description": "Read map-generation session IDs and prerequisites. This tool does not generate terrain or publish a world.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_physics",
+    "description": "Patch existing PhysicsCollider fields using native component changes. Read canvas_node first. Numeric limits match editor UI.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "properties": {
+          "type": "object",
+          "properties": {
+            "EnableCollision": {
+              "type": "boolean"
+            },
+            "EnableRigidBody": {
+              "type": "boolean"
+            },
+            "UseGravity": {
+              "type": "boolean"
+            },
+            "Mass": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "Drag": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "AngularDrag": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 50
+            },
+            "DynamicFriction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "StaticFriction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "Bounciness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId",
+        "properties"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_preview",
+    "description": "Read status, start or stop local runtime preview. Start may load avatar assets and executes scene scripts; no publishing. Scene mutations require stopping preview.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "status",
+            "start",
+            "stop"
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "action"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_replace_asset",
+    "description": "Replace one scene object with an already-loaded asset using native undoable replacement. Descendants and scripts are replaced. Returns a NEW instanceId and read-back transform; inspect it before further updates and save.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assetId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId",
+        "assetId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_runtime_object",
+    "description": "Read an active native runtime object by exact name, its position and up to 50 immediate child names. Useful for preview diagnostics; no code execution or modification.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "projectId",
+        "name"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_save",
+    "description": "Back up scene.data, invoke editor native save, verify clean save state and return persisted file SHA-256.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_scene",
+    "description": "Read actual open editor scene roots, IDs, transforms and save state. Set allNodes to include descendants (1000 maximum).",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "allNodes": {
+          "type": "boolean"
+        }
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_script_bind",
+    "description": "Bind an existing valid project Lua script to one object with schema defaults and optional parameter overrides. Scripts run during preview; inspect script and target compatibility first.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scriptId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "params": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/__schema0"
+          }
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId",
+        "scriptId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "__schema0": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema0"
+              }
+            },
+            {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "$ref": "#/definitions/__schema0"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "worldcreator_canvas_script_params",
+    "description": "Patch named parameters on an existing script binding; preserve other values and validate against registered schema.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scriptId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "params": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/definitions/__schema0"
+          }
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId",
+        "scriptId",
+        "params"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "__schema0": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/__schema0"
+              }
+            },
+            {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "$ref": "#/definitions/__schema0"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "worldcreator_canvas_script_unbind",
+    "description": "Remove one script binding from an object without deleting its Lua source.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scriptId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId",
+        "scriptId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_scripts",
+    "description": "List registered project Lua scripts, parameter definitions and diagnostics.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_terrain",
+    "description": "Read active native terrain origin, size and sampled world heights for [x,z] points. Does not modify terrain. Use inside flag before placement.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "points": {
+          "default": [],
+          "maxItems": 200,
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "additionalItems": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_ungroup",
+    "description": "Dissolve a native group, preserving its children. Group root is removed. Inspect scripts on the root before dissolving.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_canvas_update",
+    "description": "Edit an existing canvas object by ID through native editor actions. Rotation uses local Euler degrees. Changes are undoable and require canvas_save to persist.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "instanceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "position": {
+          "type": "array",
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "rotation": {
+          "type": "array",
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "scale": {
+          "type": "array",
+          "items": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "additionalItems": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "expectedTransform": {
+          "type": "object",
+          "properties": {
+            "localPosition": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "localEulerAngles": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "localScale": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          },
+          "required": [
+            "localPosition",
+            "localEulerAngles",
+            "localScale"
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "instanceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_debug_capabilities",
+    "description": "Report verified runtime debugging capabilities and missing Lua breakpoint/step/local-variable support. Does not substitute JavaScript CDP debugging for Lua debugging.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_inspect_model",
+    "description": "Inspect a Module using installed native tools. Runs trusted preview-module.js when present, otherwise reads GLB. Use node-tree first, or nodes with nodePaths [\"\" ] for the whole-model bounds. Does not intentionally write assets; source is executable JavaScript.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "resourceId": {
+          "type": "string",
+          "pattern": "^module-[a-z0-9][a-z0-9-]*$"
+        },
+        "query": {
+          "type": "string",
+          "enum": [
+            "node-tree",
+            "nodes"
+          ]
+        },
+        "nodePaths": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId",
+        "resourceId",
+        "query"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_job_cancel",
+    "description": "Request cancellation of a tracked PCG job. Native activation can be cancelled only when one new runtime graph is identifiable; partial scene changes remain. World uploads cannot be cancelled. Query job_status for final state.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "jobId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "projectId",
+        "jobId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_job_status",
+    "description": "Read a long-running native MCP job. Tracking survives MCP client reconnects but not renderer restarts; inspect PCG/world state after an editor restart.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "jobId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "projectId",
+        "jobId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_list_files",
+    "description": "List up to 1000 workspace files, optionally beneath a relative directory.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "directory": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_list_workspaces",
+    "description": "List local projects and AI workspaces, excluding log folders. Use these identifiers for all workspace tools.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_models",
+    "description": "Read configured model IDs and agent defaults from the installed editor. Internal aliases do not identify the upstream model.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_pcg_context",
+    "description": "Read map session artifact IDs and statuses for terrain/sprinkle generation. Omits signed resource URLs.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "workspaceId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_pcg_select",
+    "description": "Patch selected library model for known sprinkle overlay IDs; preserve other overlays. Requires pcg_selections revision, verifies static asset resources and uses native selection action. Does not generate; call pcg_start compose separately.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "artifactId": {
+          "type": "string"
+        },
+        "expectedRevision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "selections": {
+          "minItems": 1,
+          "maxItems": 100,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "overlayId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "assetId": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "overlayId",
+              "assetId"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId",
+        "artifactId",
+        "expectedRevision",
+        "selections"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_pcg_selections",
+    "description": "Read completed sprinkle overlay IDs, selected model IDs and a revision for safe edits. Does not start generation.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "artifactId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId",
+        "artifactId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_pcg_start",
+    "description": "Start native terrain generation, sprinkle parsing, map composition, or canvas activation. Cloud stages may consume credits. Use dryRun first. compose uses the existing sprinkle asset selections. Activation can replace scene content: requires explicit clearSceneConfirmed and creates scene.data backup. Returns asynchronous jobId; poll job_status, never retry with a new requestId after an uncertain result.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "workspaceId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "terrain",
+            "sprinkle",
+            "compose",
+            "activate_terrain",
+            "activate_map"
+          ]
+        },
+        "artifactId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prompt": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "dryRun": {
+          "default": true,
+          "type": "boolean"
+        },
+        "clearSceneConfirmed": {
+          "type": "boolean"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId",
+        "action",
+        "artifactId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_project_list",
+    "description": "List signed-in homepage projects within the configured projects root. If homepage is closed, returns scope=open_project_only and just the current canvas. Editor must be started with MCP connection port.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_project_open",
+    "description": "Open an existing registered project using the native homepage service. Returns requested before canvas finishes loading; poll status. If a canvas is already open, only accepts that same project and never replaces or closes another project.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_publish_prepare",
+    "description": "Prepare a reviewable world upload plan without uploading. Validates saved scene, capacity, Lua diagnostics and metadata. Returns planId valid 10 minutes; scene changes invalidate it. Upload does not automatically mean public listing.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_publish_status",
+    "description": "Read world upload state; refresh=true queries the official service and reconciles completed remote processing into local status. Upload acceptance, remote processing and public listing are separate.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "refresh": {
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_publish_submit",
+    "description": "Upload the exact prepared world through the editor native account pipeline. Call only when the user authorizes uploading the reviewed world. Requires confirmed=true and prepared planId; returns jobId. Does not automatically publicly list the world; remote processing/review requires publish_status.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": true
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "planId": {
+          "type": "string"
+        },
+        "confirmed": {
+          "type": "boolean",
+          "const": true
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      },
+      "required": [
+        "projectId",
+        "planId",
+        "confirmed",
+        "requestId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_read_file",
+    "description": "Read a UTF-8 workspace text file (1 MiB maximum) and its SHA-256 for optimistic writes.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId",
+        "file"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_script_files",
+    "description": "List editable project scripts/modules Lua files with source SHA-256 and script IDs; excludes official/builtin code.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_script_read",
+    "description": "Read project modules/name.lua source and SHA-256. Preserve identity annotations when editing.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "file": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "projectId",
+        "file"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_script_refresh",
+    "description": "Refresh native Lua catalog and return scripts/diagnostics after external file edits. Does not run scripts.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_script_write",
+    "description": "Create/update project modules/name.lua. Null expectedSha256 creates only; updates require the current hash. Compiles Lua without execution, backs up prior bytes, preserves identity annotations and refreshes native catalog. New scripts receive IDs automatically. Scripts execute on next preview; inspect diagnostics before binding. No automatic preview or publishing.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "file": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 1048576
+        },
+        "expectedSha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "file",
+        "content",
+        "expectedSha256"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_settings_read",
+    "description": "Read world rules, environment values, loaded templates, editable native schemas and revision. Unsupported asset-picker fields are marked read-only.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        }
+      },
+      "required": [
+        "projectId"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_settings_update",
+    "description": "Patch world rules or environment parameters through native editor actions. Read settings_read first and pass revision. Supports loaded template selection, sun/light, fog, weather and exposed scalar fields; preserve unrelated settings. Save canvas separately.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "pattern": "^project_[a-zA-Z0-9_-]+$"
+        },
+        "group": {
+          "type": "string",
+          "enum": [
+            "environment",
+            "global"
+          ]
+        },
+        "expectedRevision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "properties": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": [
+              "number",
+              "boolean",
+              "string"
+            ]
+          }
+        },
+        "templateId": {
+          "type": "string"
+        },
+        "templateScope": {
+          "type": "string",
+          "enum": [
+            "official",
+            "user"
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "group",
+        "expectedRevision"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_status",
+    "description": "Report adapter availability and actual live-editor connection status.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_validate_lua",
+    "description": "Compile Lua 5.3 source without executing it, using the editor bundled compiler. Returns ok:false and error details for invalid syntax.",
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "maxLength": 1048576
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  },
+  {
+    "name": "worldcreator_write_file",
+    "description": "Create/update an author text file. Pass the last read SHA-256, or null for create-only. Prior bytes are backed up. Derived package/review files cannot be written.",
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": true,
+      "openWorldHint": false
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "expectedSha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "workspaceId",
+        "file",
+        "content",
+        "expectedSha256"
+      ],
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  }
+]

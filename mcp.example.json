@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "worldcreator": {
+      "command": "node",
+      "args": ["C:/tools/world-creator-mcp/src/server.mjs"],
+      "env": {
+        "WORLD_CREATOR_INSTALL": "D:/造世界编辑器"
+      }
+    }
+  }
+}
