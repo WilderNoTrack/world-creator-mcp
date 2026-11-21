@@ -32,7 +32,7 @@ export class WorkspaceService {
   }
 
   workspace({ projectId, workspaceId }) {
-    if (!/^project_[A-Za-z0-9_-]+$/.test(projectId) || !/^workspace_[A-Za-z0-9_-]+$/.test(workspaceId) || workspaceId.endsWith('_log')) throw new Error('Invalid project/workspace identifier');
+    if (!/^project[_-][A-Za-z0-9_-]+$/.test(projectId) || !/^workspace_[A-Za-z0-9_-]+$/.test(workspaceId) || workspaceId.endsWith('_log')) throw new Error('Invalid project/workspace identifier');
     const root = this.checkedPath(this.projectsRoot, `${projectId}/ai-sessions/${workspaceId}`);
     if (!isDirectory(root)) throw new Error('Workspace not found');
     return root;
@@ -61,7 +61,7 @@ export class WorkspaceService {
 
   async listWorkspaces() {
     const result = [];
-    for (const p of directories(this.projectsRoot).filter(d => /^project_[A-Za-z0-9_-]+$/.test(d.name))) {
+    for (const p of directories(this.projectsRoot).filter(d => /^project[_-][A-Za-z0-9_-]+$/.test(d.name))) {
       const projectRoot = this.checkedPath(this.projectsRoot, p.name);
       const sessions = this.checkedPath(projectRoot, 'ai-sessions');
       const projectName = json(path.join(projectRoot, 'project.json')).name || p.name;

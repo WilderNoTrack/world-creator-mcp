@@ -16,7 +16,7 @@ export async function editorOperation(operation, args = {}) {
   };
   const context = info();
   const rootKey = p => p.replace(/\\/g,'/').replace(/\/+$/,'').toLowerCase();
-  if(args.expectedProjectsRoot&&(!/^project_[A-Za-z0-9_-]+$/.test(context.projectId)||rootKey(context.projectRoot)!==rootKey(args.expectedProjectsRoot)+'/'+context.projectId.toLowerCase()))throw new Error('Open project path outside configured projects root');
+  if(args.expectedProjectsRoot&&(!/^project[_-][A-Za-z0-9_-]+$/.test(context.projectId)||rootKey(context.projectRoot)!==rootKey(args.expectedProjectsRoot)+'/'+context.projectId.toLowerCase()))throw new Error('Open project path outside configured projects root');
   if (args.projectId && args.projectId !== context.projectId) throw new Error(`Wrong project: expected ${args.projectId}, open ${context.projectId}`);
   if (args.expectedProjectRoot && rootKey(args.expectedProjectRoot)!==rootKey(context.projectRoot)) throw new Error('Open project path changed before operation');
   if (!get('RuntimeService').initialized) throw new Error('Editor runtime is not ready');

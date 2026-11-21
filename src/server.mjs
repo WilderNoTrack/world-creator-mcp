@@ -41,7 +41,7 @@ register('status', 'Report adapter availability and actual live-editor connectio
   limitations: ['Requires editor started with local CDP port and one open project; keep window visible for native frame-dependent operations', 'PCG selection/composition partially live verified; native activation can stall; world upload submission is not end-to-end verified', 'Components require native editable schema; no arbitrary Unity component attachment and no exposed standalone water-block fields', 'No verified Lua breakpoint/step/locals API; uploading is not public listing', 'Native inspection executes preview-module.js; use trusted local workspaces'],
 }));
 
-const project = { projectId: z.string().regex(/^project_[a-zA-Z0-9_-]+$/) };
+const project = { projectId: z.string().regex(/^project[_-][a-zA-Z0-9_-]+$/) };
 const vec = z.tuple([z.number().finite(),z.number().finite(),z.number().finite()]);
 const object = {...project,instanceId:z.string().min(1)};
 const script = {...object,scriptId:z.string().min(1)};
@@ -49,7 +49,19 @@ const revision=z.string().regex(/^[a-f0-9]{64}$/);
 register('canvas_runtime_object','Read an active native runtime object by exact name, its position and up to 50 immediate child names. Useful for preview diagnostics; no code execution or modification.',{...project,name:z.string().min(1).max(128)},true,a=>live.call('runtime_object',a));
 register('canvas_terrain','Read active native terrain origin, size and sampled world heights for [x,z] points. Does not modify terrain. Use inside flag before placement.',{...project,points:z.array(z.tuple([z.number().finite(),z.number().finite()])).max(200).default([])},true,a=>live.call('terrain_info',a));
 register('canvas_capture','Capture the current editor viewport via its native renderer connection into a local PNG. Returns local filePath; does not publish or upload.',project,true,(a,e)=>live.capture(a,e.signal));
-register('project_list','List signed-in homepage projects within the configured projects root. If homepage is closed, returns scope=open_project_only and just the current canvas. Editor must be started with MCP connection port.',{},true,(a,e)=>live.homepage('list',a,e.signal));
+register('project_list','List signed-in homepage projects separately from local project folders. Local-only folders are not opened until the editor homepage registers them. If homepage is closed, returns the currently open canvas when available.',{},true,async(a,e)=>{
+  const homepage=await live.homepage('list',a,e.signal);
+  const rootReal=fs.realpathSync.native(projectsRoot);
+  const localProjects=fs.readdirSync(rootReal,{withFileTypes:true}).filter(entry=>entry.isDirectory()&&!entry.isSymbolicLink()&&/^project[_-][A-Za-z0-9_-]+$/.test(entry.name)).flatMap(entry=>{
+    const projectRoot=path.join(rootReal,entry.name);
+    const real=fs.realpathSync.native(projectRoot);
+    const relative=path.relative(rootReal,real);
+    if(relative.startsWith('..')||path.isAbsolute(relative)||real.toLowerCase()!==projectRoot.toLowerCase())return [];
+    let metadata={};try{metadata=JSON.parse(fs.readFileSync(path.join(real,'project.json'),'utf8'));}catch{}
+    return [{projectId:entry.name,name:metadata.name||entry.name,projectRoot:real,homepageRegistered:homepage.projects.some(project=>project.projectId===entry.name)}];
+  });
+  return {...homepage,localProjects};
+});
 register('project_open','Open an existing registered project using the native homepage service. Returns requested before canvas finishes loading; poll status. If a canvas is already open, only accepts that same project and never replaces or closes another project.',project,false,(a,e)=>live.homepage('open',a,e.signal));
 register('asset_search','Search the signed-in native model library (public/personal/favorite), hydrating results for canvas_add_asset or pcg_select. Returns IDs and pagination, without signed URLs. staticOnly restricts to static models suitable for sprinkle.',{...project,query:z.string().trim().min(1).max(100),scope:z.enum(['public','personal','favorite']).default('public'),staticOnly:z.boolean().default(false),page:z.number().int().min(0).max(1000).default(0),cursor:z.string().max(2000).optional(),limit:z.number().int().min(1).max(50).default(20)},false,(a,e)=>live.call('asset_search',a,e.signal));
 register('pcg_selections','Read completed sprinkle overlay IDs, selected model IDs and a revision for safe edits. Does not start generation.',{...project,workspaceId:z.string(),artifactId:z.string()},true,a=>live.call('pcg_selections',a));

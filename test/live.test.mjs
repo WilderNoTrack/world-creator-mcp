@@ -8,6 +8,7 @@ import { LiveEditor, validateEndpoint, readGlb } from '../src/live.mjs';
 
 test('configured project directory is enforced by transport for every handler family',async()=>{
  const f=fixture(),allowed=path.resolve('allowed-projects'),outside=path.resolve('outside-projects/project_test');
+ await fs.mkdir(path.join(allowed,'project_test'),{recursive:true});
  f.state.projectSettings.projectInfo.projectRoot=outside;
  const live=new LiveEditor({projectsRoot:allowed});
  live.target=async()=>({});
