@@ -37,6 +37,7 @@ export class LiveEditor {
   }
   async homepage(operation,args={},signal){
     if(operation==='open'){
+      await this.assertProjectPath(args.projectId);
       let current;
       try{current=await this.target();}catch(e){if(e.message!=='Expected one open editor canvas, found 0')throw e;}
       if(current){const s=await this.call('scene',{projectId:args.projectId,expectedProjectRoot:path.join(this.projectsRoot,args.projectId)},signal);return{projectId:s.projectId,ready:true,alreadyOpen:true};}
@@ -54,11 +55,19 @@ export class LiveEditor {
     if(r.exceptionDetails)throw new Error(r.exceptionDetails.exception?.description?.split('\n')[0]||r.exceptionDetails.text);
     if(r.result?.value===undefined)throw new Error('Homepage returned no result');return r.result.value;
   }
+  async assertProjectPath(projectId){
+    if(!/^project[_-][A-Za-z0-9_-]+$/.test(projectId))throw new Error('Invalid project identifier');
+    const configuredRoot=await fs.realpath(this.projectsRoot);
+    const expected=path.join(configuredRoot,projectId);
+    const actual=await fs.realpath(path.join(this.projectsRoot,projectId));
+    const normalize=p=>process.platform==='win32'?p.toLowerCase():p;
+    if(normalize(actual)!==normalize(expected))throw new Error('Project real path outside configured projects root');
+    return actual;
+  }
   async call(operation,args={},signal) {
     if(!this.projectsRoot)throw new Error('Configured projects root required');
     if(args.projectId!==undefined){
-      if(!/^project_[A-Za-z0-9_-]+$/.test(args.projectId))throw new Error('Invalid project identifier');
-      const expected=path.join(this.projectsRoot,args.projectId);
+      const expected=await this.assertProjectPath(args.projectId);
       const key=p=>path.resolve(p).toLowerCase();
       if(args.expectedProjectRoot&&key(args.expectedProjectRoot)!==key(expected))throw new Error('Project path conflicts with configured projects root');
       args={...args,expectedProjectRoot:expected};

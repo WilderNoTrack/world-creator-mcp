@@ -43,6 +43,13 @@ test('workspace authoring preserves originals and blocks stale writes and path e
   await fs.symlink(path.join(root, 'outside'), path.join(ws, 'escape'), process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(svc.readFile({ ...selection, file: 'escape/secret.txt' }), /link|scope/i);
 });
+test('workspace discovery and identity checks support both project directory formats', async()=>{
+ const {WorkspaceService}=await import(modulePath);const base=await fs.mkdtemp(path.join(os.tmpdir(),'world-mcp-project-ids-'));const projects=path.join(base,'projects');
+ for(const id of ['project_demo','project-demo'])await fs.mkdir(path.join(projects,id,'ai-sessions','workspace_demo'),{recursive:true});
+ const svc=new WorkspaceService({projectsRoot:projects,backupRoot:path.join(base,'backups')});const items=await svc.listWorkspaces();assert.deepEqual(items.map(x=>x.projectId).sort(),['project-demo','project_demo']);
+ for(const projectId of ['project_demo','project-demo'])assert.equal(svc.workspace({projectId,workspaceId:'workspace_demo'}),path.join(projects,projectId,'ai-sessions','workspace_demo'));
+ await assert.rejects(Promise.resolve().then(()=>svc.workspace({projectId:'../project_demo',workspaceId:'workspace_demo'})),/identifier/i);
+});
 
 test('two MCP service instances cannot operate concurrently through workspace case aliases; locks release on failure', async () => {
   const { WorkspaceService } = await import(modulePath);

@@ -108,3 +108,7 @@ node scripts/smoke-canvas-controls.mjs project_ID
 参见 [SECURITY.md](SECURITY.md) 和 [CHANGELOG.md](CHANGELOG.md)。源码采用 MIT 许可；此许可不覆盖编辑器、官方依赖、账户资源或第三方素材。
 
 发行包只包含本适配器源码、测试和文档，**不包含编辑器源码、内部编译 worker、账号凭据或用户世界**。每位使用者需安装编辑器并在自己电脑上构建 `.local/native-worker.cjs`。
+
+### Project ID compatibility
+
+Windows editor 1.0.103.0 uses the project- prefix. Both project- and project_ IDs are accepted, with directory containment and project identity checks retained. Local folders are reported separately and are not registered by this integration.
